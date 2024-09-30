@@ -3,7 +3,7 @@
 import argparse
 import json
 import sys
-from typing import Any, List, Union
+from typing import Any, List, Union, Dict
 from pathlib import Path
 
 # Updated imports for latest Textual version
@@ -12,33 +12,33 @@ from textual.widgets import Tree, Header, Footer, Static
 from textual.containers import Container, ScrollableContainer
 from textual.screen import ModalScreen
 from textual.binding import Binding
+from rich.text import Text
 
 
 # Constants
 MAX_TEXT_DISPLAY = 500  # Characters
 
-def parse_input(input_data: str) -> Union[dict, List[Any]]:
+def parse_input(input_data: str) -> List[Union[Dict[str, Any], str]]:
     """
-    Parse input data as JSON or JSONL.
+    Parse input data as JSON or JSONL, handling errors for individual lines.
     """
+    lines = input_data.strip().splitlines()
+    result = []
+
+    # Try parsing as standard JSON first
     try:
-        # Try parsing as standard JSON
-        return json.loads(input_data)
+        parsed_json = json.loads(input_data)
+        return [parsed_json]
     except json.JSONDecodeError:
-        # If fails, try parsing as JSONL
-        lines = input_data.strip().splitlines()
-        json_list = []
+        # If standard JSON fails, parse line by line
         for idx, line in enumerate(lines, start=1):
             if line.strip():  # Ignore empty lines
                 try:
-                    json_list.append(json.loads(line))
+                    result.append(json.loads(line))
                 except json.JSONDecodeError as e:
-                    raise json.JSONDecodeError(
-                        f"Invalid JSON in JSONL at line {idx}: {e.msg}",
-                        e.doc,
-                        e.pos
-                    )
-        return json_list
+                    result.append(f"Line {idx}: Parsing Error - {str(e)}")
+
+    return result
 
 def truncate_text(text: str, limit: int = MAX_TEXT_DISPLAY) -> str:
     """
@@ -53,7 +53,7 @@ class JSONTree(Tree):
     Tree to display JSON data.
     """
 
-    def __init__(self, label: str, data: Any):
+    def __init__(self, label: str, data: List[Union[Dict[str, Any], str]]):
         super().__init__(label)
         self.data = data
 
@@ -62,16 +62,20 @@ class JSONTree(Tree):
         self.add_json_nodes(self.root, self.data)
 
     def add_json_nodes(self, parent, data: Any) -> None:
-        if isinstance(data, dict):
+        if isinstance(data, list):
+            for index, item in enumerate(data):
+                if isinstance(item, str) and item.startswith("Line"):
+                    # This is an error message
+                    node = parent.add(Text(f"[{index}]: {item}", style="bold red"))
+                else:
+                    node = parent.add(f"[{index}]: {self.format_value(item)}")
+                    node.data = item
+                    self.add_json_nodes(node, item)
+        elif isinstance(data, dict):
             for key, value in data.items():
                 node = parent.add(f"{key}: {self.format_value(value)}")
                 node.data = value
                 self.add_json_nodes(node, value)
-        elif isinstance(data, list):
-            for index, item in enumerate(data):
-                node = parent.add(f"[{index}]: {self.format_value(item)}")
-                node.data = item
-                self.add_json_nodes(node, item)
 
     def format_value(self, value: Any) -> str:
         if isinstance(value, str):
@@ -142,7 +146,7 @@ class JSONInspectApp(App):
         Binding("ctrl+c", "quit", "Quit"),
     ]
 
-    def __init__(self, data: Any):
+    def __init__(self, data: List[Union[Dict[str, Any], str]]):
         super().__init__()
         self.data = data
 
@@ -192,11 +196,7 @@ def main():
             sys.exit(1)
 
     # Parse input
-    try:
-        parsed_data = parse_input(input_data)
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON input. {e}", file=sys.stderr)
-        sys.exit(1)
+    parsed_data = parse_input(input_data)
 
     # Run the app
     app = JSONInspectApp(parsed_data)
