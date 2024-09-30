@@ -4,5 +4,5 @@
 __pycache__/
 build
 dist
-jsonl_visualize.egg-info
+jsonltui.egg-info
 znotes

@@ -1,0 +1,1 @@
+A fast TUI application (with optional webui) to visually navigate and inspect JSON and JSONL data. Easily localize parse errors in large JSONL files. Made with LLM fine-tuning workflows in mind.

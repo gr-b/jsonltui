@@ -1,18 +1,18 @@
-# jsonl_visualize
+# jsonltui
 
-jsonl_visualize is a fast TUI application (with optional slow webui) to visually navigate and inspect JSON and JSONL data.
+jsonltui is a fast TUI application (with optional slow webui) to visually navigate and inspect JSON and JSONL data.
 Easily localize parse errors in large JSONL files. Made with LLM fine-tuning workflows in mind.
 
 With JSONL error handling:
-![jsonl_visualize tree view](img.png)
+![jsonltui tree view](img.png)
 
 With modal view for large strings:
-![jsonl_visualize modal screen](img_1.png)
+![jsonltui modal screen](img_1.png)
 
 ## Installation
 
 ```
-pip install jsonl_visualize
+pip install jsonltui
 ```
 
 ## Features
@@ -27,25 +27,25 @@ pip install jsonl_visualize
 
 ## Usage
 
-You can use jsonl_visualize in three ways:
+You can use jsonltui in three ways:
 
 1. With a JSON or JSONL file using the TUI:
    ```
-   jsonl_visualize path/to/your/file.json
+   jsonltui path/to/your/file.json
    ```
 
 2. With piped input using the TUI:
    ```
-   cat path/to/your/file.json | jsonl_visualize
+   cat path/to/your/file.json | jsonltui
    ```
 
 3. With the Web UI option:
    ```
-   jsonl_visualize --webui path/to/your/file.json
+   jsonltui --webui path/to/your/file.json
    ```
    or
    ```
-   cat path/to/your/file.json | jsonl_visualize --webui
+   cat path/to/your/file.json | jsonltui --webui
    ```
 
 ### TUI Keyboard Controls
@@ -61,7 +61,7 @@ The Web UI provides a familiar interface with collapsible tree nodes and expanda
 
 ## Error Handling
 
-When jsonl_visualize encounters a parsing error in a JSONL file, it will:
+When jsonltui encounters a parsing error in a JSONL file, it will:
 
 1. Display the error in red at the appropriate position in the tree.
 2. Show the line number where the error occurred.
@@ -77,11 +77,11 @@ This allows you to inspect and debug issues in your JSON data easily.
 
 2. Clone this repository:
    ```
-   git clone https://github.com/gr-b/jsonl_visualize.git
-   cd jsonl_visualize
+   git clone https://github.com/gr-b/jsonltui.git
+   cd jsonltui
    ```
 
-3. Install the required dependencies:
+3. Install locally
    ```
    pip install -e .
    ```

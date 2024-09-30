@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='jsonl_visualize',
-    version='0.1.2',
+    name='jsonltui',
+    version='0.1.0',
     description="A TUI application to visually inspect and navigate JSON and JSONL data",
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",
@@ -12,11 +12,11 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'jsonl_visualize=jsonl_visualize.main:main',
+            'jsonltui=jsonltui.main:main',
         ],
     },
     package_data={
-            'jsonl_visualize': ['web_template.html'],
+            'jsonltui': ['web_template.html'],
     },
     python_requires='>=3.7',
     license='MIT',
@@ -26,5 +26,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    url="https://github.com/gr-b/jsonl_visualize",
+    url="https://github.com/gr-b/jsonltui",
 )
