@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced JSON/JSONL Viewer with Improved Error Handling and Styling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        #jsonInput {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        #visualizeButton {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #treeView {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .tree-node {
+            margin-left: 20px;
+            line-height: 1.5;
+        }
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapsible::before {
+            content: '\25B6';
+            color: #666;
+            display: inline-block;
+            margin-right: 6px;
+            transition: transform 0.3s;
+        }
+        .active::before {
+            transform: rotate(90deg);
+        }
+        .content {
+            display: none;
+            overflow: hidden;
+            padding-left: 15px;
+            border-left: 1px dotted #ccc;
+            margin-left: 7px;
+        }
+        .show {
+            display: block;
+        }
+        .key {
+            color: #881391;
+            font-weight: bold;
+        }
+        .string {
+            color: #0B7500;
+        }
+        .number {
+            color: #1A01CC;
+        }
+        .boolean {
+            color: #FF8C00;
+        }
+        .null {
+            color: #808080;
+        }
+        .error {
+            border-left: 2px solid #FF0000;
+            padding-left: 5px;
+        }
+        .error-container {
+            color: #FF0000;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            height: 70vh;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #modalTitle {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #881391;
+        }
+        #modalContent {
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #errorMessage {
+            color: #FF0000;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .truncated {
+            background-color: #e1e1e1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .truncated:hover {
+            background-color: #d1d1d1;
+        }
+    </style>
+</head>
+<body>
+<textarea id="jsonInput" placeholder="Paste your JSON or JSONL here"></textarea>
+<button id="visualizeButton" onclick="visualizeJSON()">Visualize</button>
+<div id="errorMessage"></div>
+<div id="treeView"></div>
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modalTitle"></div>
+        <pre id="modalContent"></pre>
+    </div>
+</div>
+
+<script>
+    function visualizeJSON() {
+        const input = document.getElementById('jsonInput').value;
+        const errorMessageElement = document.getElementById('errorMessage');
+        const treeView = document.getElementById('treeView');
+        let data;
+        let errorMessage = '';
+
+        try {
+            // Try parsing as JSON
+            data = JSON.parse(input);
+            errorMessageElement.textContent = ''; // Clear any previous error messages
+        } catch (e) {
+            // If JSON parsing fails, try parsing as JSONL
+            try {
+                data = input.split('\n')
+                    .filter(line => line.trim() !== '')
+                    .map((line, index) => {
+                        try {
+                            return JSON.parse(line);
+                        } catch (lineError) {
+                            return { error: `Line ${index + 1}: ${lineError.message}`, originalLine: line };
+                        }
+                    });
+
+                // Check if there were any parsing errors
+                const errors = data.filter(item => item.error);
+                if (errors.length > 0) {
+                    errorMessage = `Parsing errors found in ${errors.length} line(s). Objects with errors are highlighted in red.`;
+                } else {
+                    errorMessage = '';
+                }
+                errorMessageElement.textContent = errorMessage;
+            } catch (e2) {
+                errorMessage = `Error parsing input: ${e2.message}\n\nPartial parsing results are shown below:`;
+                errorMessageElement.textContent = errorMessage;
+
+                // Attempt to parse as much as possible
+                data = input.split('\n')
+                    .filter(line => line.trim() !== '')
+                    .map((line, index) => {
+                        try {
+                            return JSON.parse(line);
+                        } catch (lineError) {
+                            return { error: `Line ${index + 1}: ${lineError.message}`, originalLine: line };
+                        }
+                    });
+            }
+        }
+
+        treeView.innerHTML = '';
+        treeView.appendChild(createTreeNode(data));
+    }
+
+    function createTreeNode(data, key = '', isRoot = true) {
+        const node = document.createElement('div');
+        node.className = 'tree-node';
+
+        if (Array.isArray(data)) {
+            const span = document.createElement('span');
+            span.className = 'collapsible';
+            span.innerHTML = key ? `<span class="key">${key}</span>: ` : '';
+            span.innerHTML += `Array[${data.length}]`;
+            span.onclick = toggleCollapse;
+            node.appendChild(span);
+
+            const content = document.createElement('div');
+            content.className = 'content';
+            let hasError = false;
+
+            const displayItems = data.slice(0, 10);
+            const remainingItems = data.slice(10);
+
+            displayItems.forEach((item, index) => {
+                const childNode = createTreeNode(item, `[${index}]`, false);
+                content.appendChild(childNode);
+                if (childNode.querySelector('.error-container')) {
+                    hasError = true;
+                }
+            });
+
+            if (remainingItems.length > 0) {
+                const truncatedNode = document.createElement('div');
+                truncatedNode.className = 'truncated';
+                truncatedNode.textContent = `${remainingItems.length} more items. Click to expand`;
+                truncatedNode.onclick = () => expandTruncatedItems(content, remainingItems, displayItems.length);
+                content.appendChild(truncatedNode);
+
+                // Display error objects from remaining items
+                remainingItems.forEach((item, index) => {
+                    if (item && item.error) {
+                        const errorNode = createTreeNode(item, `[${displayItems.length + index}]`, false);
+                        content.appendChild(errorNode);
+                        hasError = true;
+                    }
+                });
+            }
+
+            node.appendChild(content);
+
+            if (hasError) {
+                span.classList.add('error-container');
+            }
+        } else if (typeof data === 'object' && data !== null) {
+            const span = document.createElement('span');
+            span.className = 'collapsible';
+            span.innerHTML = key ? `<span class="key">${key}</span>: ` : '';
+            span.innerHTML += 'Object';
+            span.onclick = toggleCollapse;
+            node.appendChild(span);
+
+            const content = document.createElement('div');
+            content.className = 'content';
+
+            if (data.hasOwnProperty('error')) {
+                // This is an error object
+                span.classList.add('error-container');
+                const errorNode = document.createElement('div');
+                errorNode.className = 'error';
+                errorNode.textContent = `Error: ${data.error}`;
+                content.appendChild(errorNode);
+
+                if (data.hasOwnProperty('originalLine')) {
+                    const originalLineNode = document.createElement('div');
+                    const truncatedLine = data.originalLine.length > 1000 ?
+                        data.originalLine.substring(0, 1000) + '...' :
+                        data.originalLine;
+                    originalLineNode.textContent = `Original line: ${truncatedLine}`;
+                    if (data.originalLine.length > 1000) {
+                        originalLineNode.className = 'truncated';
+                        originalLineNode.onclick = () => showModal('Original Line', data.originalLine);
+                    }
+                    content.appendChild(originalLineNode);
+                }
+            } else {
+                // Regular object
+                let hasError = false;
+                const entries = Object.entries(data);
+                const displayEntries = entries.slice(0, 10);
+                const remainingEntries = entries.slice(10);
+
+                displayEntries.forEach(([k, v]) => {
+                    const childNode = createTreeNode(v, k, false);
+                    content.appendChild(childNode);
+                    if (childNode.querySelector('.error-container')) {
+                        hasError = true;
+                    }
+                });
+
+                if (remainingEntries.length > 0) {
+                    const truncatedNode = document.createElement('div');
+                    truncatedNode.className = 'truncated';
+                    truncatedNode.textContent = `${remainingEntries.length} more keys. Click to expand`;
+                    truncatedNode.onclick = () => expandTruncatedItems(content, remainingEntries, displayEntries.length);
+                    content.appendChild(truncatedNode);
+
+                    // Display error objects from remaining items
+                    remainingEntries.forEach(([k, v], index) => {
+                        if (v && v.error) {
+                            const errorNode = createTreeNode(v, k, false);
+                            content.appendChild(errorNode);
+                            hasError = true;
+                        }
+                    });
+                }
+
+                if (hasError) {
+                    span.classList.add('error-container');
+                }
+            }
+
+            node.appendChild(content);
+        } else {
+            const span = document.createElement('span');
+            span.innerHTML = key ? `<span class="key">${key}</span>: ` : '';
+            node.appendChild(span);
+
+            const value = document.createElement('span');
+            const stringValue = String(data);
+            value.className = typeof data;
+            if (stringValue.length > 1000) {
+                value.textContent = stringValue.substring(0, 1000) + '...';
+                value.className += ' truncated';
+                value.onclick = () => showModal(key, stringValue);
+            } else {
+                value.textContent = stringValue;
+            }
+            node.appendChild(value);
+        }
+
+        return node;
+    }
+
+    function expandTruncatedItems(contentNode, items, startIndex) {
+        const isArray = Array.isArray(items);
+
+        items.forEach((item, index) => {
+            const childNode = isArray ?
+                createTreeNode(item, `[${startIndex + index}]`, false) :
+                createTreeNode(item[1], item[0], false);
+            contentNode.insertBefore(childNode, contentNode.lastChild);
+        });
+
+        contentNode.removeChild(contentNode.lastChild); // Remove the "click to expand" node
+    }
+
+    function toggleCollapse() {
+        this.classList.toggle('active');
+        const content = this.nextElementSibling;
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+        } else {
+            content.style.display = 'block';
+        }
+    }
+
+    function showModal(key, content) {
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+
+        modalTitle.textContent = `Key: ${key}`;
+
+        // Format the content
+        let formattedContent;
+        try {
+            // Try to parse and stringify the content to format it
+            formattedContent = JSON.stringify(JSON.parse(content), null, 2);
+        } catch (e) {
+            // If parsing fails, use the original content
+            formattedContent = content;
+        }
+
+        modalContent.textContent = formattedContent;
+        modal.style.display = 'block';
+    }
+
+    const modal = document.getElementById('modal');
+    const span = document.getElementsByClassName('close')[0];
+    span.onclick = function() {
+        modal.style.display = 'none';
+    }
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

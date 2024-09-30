@@ -5,6 +5,9 @@ import json
 import sys
 from typing import Any, List, Union, Dict, Tuple
 from pathlib import Path
+import webbrowser
+import tempfile
+import os
 
 # Updated imports for latest Textual version
 from textual.app import App, ComposeResult
@@ -204,6 +207,86 @@ def main():
     # Run the app
     app = JSONInspectApp(parsed_data)
     app.run()
+
+def create_web_ui(input_data: str, html_template: str) -> str:
+    """
+    Create a web UI by injecting the input data into the HTML template.
+    """
+    # Escape any script tags in the input data to prevent XSS
+    escaped_data = input_data.replace('<script>', '&lt;script&gt;').replace('</script>', '&lt;/script&gt;')
+
+    # Inject the data into the HTML template
+    html_content = html_template.replace(
+        '<textarea id="jsonInput" placeholder="Paste your JSON or JSONL here"></textarea>',
+        f'<textarea id="jsonInput" placeholder="Paste your JSON or JSONL here">{escaped_data}</textarea>'
+    )
+
+    return html_content
+
+def open_web_ui(html_content: str):
+    """
+    Create a temporary HTML file and open it in the default web browser.
+    """
+    with tempfile.NamedTemporaryFile('w', delete=False, suffix='.html') as f:
+        f.write(html_content)
+        temp_file_path = f.name
+
+    webbrowser.open('file://' + os.path.realpath(temp_file_path))
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Inspect JSON or JSONL files with a TUI or Web UI."
+    )
+    parser.add_argument(
+        "file",
+        nargs="?",
+        type=str,
+        help="Path to the JSON or JSONL file. If omitted, reads from stdin.",
+    )
+    parser.add_argument(
+        "--webui",
+        action="store_true",
+        help="Open the JSON/JSONL in a web-based UI instead of the TUI.",
+    )
+
+    args = parser.parse_args()
+
+    # Read input
+    if args.file:
+        path = Path(args.file)
+        if not path.exists():
+            print(f"Error: File '{args.file}' does not exist.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                input_data = f.read()
+        except Exception as e:
+            print(f"Error reading file '{args.file}': {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        if sys.stdin.isatty():
+            print("Error: No input provided. Please provide a file or pipe data.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            input_data = sys.stdin.read()
+        except Exception as e:
+            print(f"Error reading from stdin: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    if args.webui:
+        # Read the HTML template
+        html_template_path = Path(__file__).parent / "web_template.html"
+        with open(html_template_path, "r") as f:
+            html_template = f.read()
+
+        # Create and open the web UI
+        html_content = create_web_ui(input_data, html_template)
+        open_web_ui(html_content)
+    else:
+        # Parse input and run the TUI app
+        parsed_data = parse_input(input_data)
+        app = JSONInspectApp(parsed_data)
+        app.run()
 
 if __name__ == "__main__":
     main()

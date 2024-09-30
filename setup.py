@@ -15,6 +15,9 @@ setup(
             'jsonl_visualize=jsonl_visualize.main:main',
         ],
     },
+    package_data={
+            'jsonl_visualize': ['web_template.html'],
+    },
     python_requires='>=3.7',
     license='MIT',
     include_package_data=True,
