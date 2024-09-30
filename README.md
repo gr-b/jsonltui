@@ -1,13 +1,12 @@
 # jsonl-visualize
 
+jsonl-visualize is a Terminal User Interface (TUI) application that allows you to visually inspect and navigate JSON and JSONL (JSON Lines) data. It provides an interactive tree view of your JSON structure, handles parsing errors gracefully, and allows for easy exploration of large JSON datasets.
+
 With JSONL error handling:
 ![jsonl-visualize tree view](img.png)
 
 With modal view for large strings:
 ![jsonl-visualize modal screen](img_1.png)
-
-
-jsonl-visualize is a Terminal User Interface (TUI) application that allows you to visually inspect and navigate JSON and JSONL (JSON Lines) data. It provides an interactive tree view of your JSON structure, handles parsing errors gracefully, and allows for easy exploration of large JSON datasets.
 
 ## Features
 
