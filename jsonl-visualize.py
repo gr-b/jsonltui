@@ -3,7 +3,7 @@
 import argparse
 import json
 import sys
-from typing import Any, List, Union, Dict
+from typing import Any, List, Union, Dict, Tuple
 from pathlib import Path
 
 # Updated imports for latest Textual version
@@ -18,7 +18,7 @@ from rich.text import Text
 # Constants
 MAX_TEXT_DISPLAY = 500  # Characters
 
-def parse_input(input_data: str) -> List[Union[Dict[str, Any], str]]:
+def parse_input(input_data: str) -> List[Union[Dict[str, Any], Tuple[int, str, str]]]:
     """
     Parse input data as JSON or JSONL, handling errors for individual lines.
     """
@@ -36,7 +36,7 @@ def parse_input(input_data: str) -> List[Union[Dict[str, Any], str]]:
                 try:
                     result.append(json.loads(line))
                 except json.JSONDecodeError as e:
-                    result.append(f"Line {idx}: Parsing Error - {str(e)}")
+                    result.append((idx, line, str(e)))
 
     return result
 
@@ -53,7 +53,7 @@ class JSONTree(Tree):
     Tree to display JSON data.
     """
 
-    def __init__(self, label: str, data: List[Union[Dict[str, Any], str]]):
+    def __init__(self, label: str, data: List[Union[Dict[str, Any], Tuple[int, str, str]]]):
         super().__init__(label)
         self.data = data
 
@@ -64,9 +64,12 @@ class JSONTree(Tree):
     def add_json_nodes(self, parent, data: Any) -> None:
         if isinstance(data, list):
             for index, item in enumerate(data):
-                if isinstance(item, str) and item.startswith("Line"):
-                    # This is an error message
-                    node = parent.add(Text(f"[{index}]: {item}", style="bold red"))
+                if isinstance(item, tuple) and len(item) == 3:
+                    # This is an error tuple (line_number, original_text, error_message)
+                    line_number, original_text, error_message = item
+                    error_node = parent.add(Text(f"[{index}]: Line {line_number}: Parsing Error", style="bold red"))
+                    error_node.add(Text(f"Original text: {truncate_text(original_text)}", style="italic"))
+                    error_node.add(Text(f"Error: {error_message}", style="dim red"))
                 else:
                     node = parent.add(f"[{index}]: {self.format_value(item)}")
                     node.data = item
@@ -146,7 +149,7 @@ class JSONInspectApp(App):
         Binding("ctrl+c", "quit", "Quit"),
     ]
 
-    def __init__(self, data: List[Union[Dict[str, Any], str]]):
+    def __init__(self, data: List[Union[Dict[str, Any], Tuple[int, str, str]]]):
         super().__init__()
         self.data = data
 
