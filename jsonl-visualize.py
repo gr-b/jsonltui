@@ -66,10 +66,12 @@ class JSONTree(Tree):
         if isinstance(data, dict):
             for key, value in data.items():
                 node = parent.add(f"{key}: {self.format_value(value)}")
+                node.data = value
                 self.add_json_nodes(node, value)
         elif isinstance(data, list):
             for index, item in enumerate(data):
                 node = parent.add(f"[{index}]: {self.format_value(item)}")
+                node.data = item
                 self.add_json_nodes(node, item)
 
     def format_value(self, value: Any) -> str:
@@ -93,6 +95,11 @@ class TextModal(ModalScreen):
     """
     Modal to display full text.
     """
+
+    BINDINGS = [
+        Binding("b", "app.pop_screen", "Back"),
+        Binding("escape", "app.pop_screen", "Back"),
+    ]
 
     def __init__(self, text: str):
         super().__init__()
