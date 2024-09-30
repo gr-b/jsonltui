@@ -12,6 +12,8 @@ from textual.widgets import Tree, Header, Footer, Static
 from textual.containers import Container, ScrollableContainer
 from textual.screen import ModalScreen
 from rich.syntax import Syntax
+from textual.binding import Binding
+
 
 # Constants
 MAX_TEXT_DISPLAY = 500  # Characters
@@ -129,6 +131,11 @@ class JSONInspectApp(App):
     }
     """
 
+    BINDINGS = [
+        Binding("q", "quit", "Quit"),
+        Binding("ctrl+c", "quit", "Quit"),
+    ]
+
     def __init__(self, data: Any):
         super().__init__()
         self.data = data
@@ -137,6 +144,11 @@ class JSONInspectApp(App):
         yield Header()
         yield JSONTree("JSON Data", self.data)
         yield Footer()
+
+    def action_quit(self) -> None:
+        """Quit the application."""
+        self.exit()
+
 
 def main():
     parser = argparse.ArgumentParser(
