@@ -11,7 +11,6 @@ from textual.app import App, ComposeResult
 from textual.widgets import Tree, Header, Footer, Static
 from textual.containers import Container, ScrollableContainer
 from textual.screen import ModalScreen
-from rich.syntax import Syntax
 from textual.binding import Binding
 
 
@@ -107,9 +106,9 @@ class TextModal(ModalScreen):
 
     def compose(self) -> ComposeResult:
         yield Container(
-            Static("Full Text", classes="modal-title"),
+            Static("Full Text (Press 'b' to go back)", classes="modal-title"),
             ScrollableContainer(
-                Static(Syntax(self.text, "json", theme="monokai", line_numbers=True))
+                Static(self.text)
             ),
             id="dialog"
         )
