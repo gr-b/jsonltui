@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='jsonl_visualize',
-    version='0.1.0',
+    version='0.1.1',
     description="A TUI application to visually inspect and navigate JSON and JSONL data",
     long_description=open('README.md').read(),
     long_description_content_type="text/markdown",

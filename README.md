@@ -8,6 +8,11 @@ With JSONL error handling:
 With modal view for large strings:
 ![jsonl_visualize modal screen](img_1.png)
 
+## Usage 
+```
+pip install jsonl_visualize
+```
+
 ## Features
 
 - Interactive tree view of JSON and JSONL data
@@ -17,7 +22,7 @@ With modal view for large strings:
 - Truncation of long text values with the ability to view full text in a modal
 - Keyboard navigation for easy exploration of the JSON structure
 
-## Installation
+## Installation (development)
 
 1. Ensure you have Python 3.7 or higher installed on your system.
 
