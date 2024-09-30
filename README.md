@@ -1,12 +1,12 @@
-# jsonl-visualize
+# jsonl_visualize
 
-jsonl-visualize is a Terminal User Interface (TUI) application that allows you to visually inspect and navigate JSON and JSONL (JSON Lines) data. It provides an interactive tree view of your JSON structure, handles parsing errors gracefully, and allows for easy exploration of large JSON datasets.
+jsonl_visualize is a Terminal User Interface (TUI) application that allows you to visually inspect and navigate JSON and JSONL (JSON Lines) data. It provides an interactive tree view of your JSON structure, handles parsing errors gracefully, and allows for easy exploration of large JSON datasets.
 
 With JSONL error handling:
-![jsonl-visualize tree view](img.png)
+![jsonl_visualize tree view](img.png)
 
 With modal view for large strings:
-![jsonl-visualize modal screen](img_1.png)
+![jsonl_visualize modal screen](img_1.png)
 
 ## Features
 
@@ -23,8 +23,8 @@ With modal view for large strings:
 
 2. Clone this repository:
    ```
-   git clone https://github.com/gr-b/jsonl-visualize.git
-   cd jsonl-visualize
+   git clone https://github.com/gr-b/jsonl_visualize.git
+   cd jsonl_visualize
    ```
 
 3. Install the required dependencies:
@@ -38,12 +38,12 @@ You can use JSON Inspector in two ways:
 
 1. With a JSON or JSONL file:
    ```
-   python jsonl-visualize.py path/to/your/file.json
+   python jsonl_visualize.py path/to/your/file.json
    ```
 
 2. With piped input:
    ```
-   cat path/to/your/file.json | python jsonl-visualize.py
+   cat path/to/your/file.json | python jsonl_visualize.py
    ```
 
 ### Keyboard Controls
@@ -55,7 +55,7 @@ You can use JSON Inspector in two ways:
 
 ## Error Handling
 
-When jsonl-visualize encounters a parsing error in a JSONL file, it will:
+When jsonl_visualize encounters a parsing error in a JSONL file, it will:
 
 1. Display the error in red at the appropriate position in the tree.
 2. Show the line number where the error occurred.

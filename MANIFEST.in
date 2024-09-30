@@ -1,3 +1,3 @@
 include README.md
 include LICENSE
-recursive-include jsonl-visualize *.py
+recursive-include jsonl_visualize *.py
