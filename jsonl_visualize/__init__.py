@@ -1,1 +1,1 @@
-from .jsonl_visualize import main
+from .main import main
