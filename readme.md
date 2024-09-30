@@ -1,72 +1,76 @@
-# JSON/JSONL Visualizer
+# jsonl-visualize
 
-A Terminal User Interface (TUI) tool for inspecting and navigating JSON and JSONL files.
+With JSONL error handling:
+![jsonl-visualize tree view](img.png)
+
+With modal view for large strings:
+![jsonl-visualize modal screen](img_1.png)
+
+
+jsonl-visualize is a Terminal User Interface (TUI) application that allows you to visually inspect and navigate JSON and JSONL (JSON Lines) data. It provides an interactive tree view of your JSON structure, handles parsing errors gracefully, and allows for easy exploration of large JSON datasets.
 
 ## Features
 
-- Supports both JSON and JSONL file formats
-- Interactive tree-like structure for easy navigation
-- Displays truncated previews of long text fields
-- Modal view for full content of long text fields
-- Keyboard shortcuts for efficient navigation
+- Interactive tree view of JSON and JSONL data
+- Supports both single JSON objects and JSONL (multiple JSON objects, one per line)
+- Graceful handling of parsing errors, displaying them inline with successfully parsed data
+- Expandable error nodes showing original unparsable text and error messages
+- Truncation of long text values with the ability to view full text in a modal
+- Keyboard navigation for easy exploration of the JSON structure
 
 ## Installation
 
-1. Ensure you have Python 3.7+ installed on your system.
+1. Ensure you have Python 3.7 or higher installed on your system.
 
-2. Install the required dependencies:
-
+2. Clone this repository:
    ```
-   pip install textual rich
+   git clone https://github.com/gr-b/jsonl-visualize.git
+   cd jsonl-visualize
    ```
 
-3. Download the `jsonl-visualize.py` script to your local machine.
+3. Install the required dependencies:
+   ```
+   pip install textual
+   ```
 
 ## Usage
 
-To use the JSON/JSONL Visualizer, run the script from the command line, providing the path to your JSON or JSONL file:
+You can use JSON Inspector in two ways:
 
-```
-python jsonl-visualize.py path/to/your/file.json
-```
+1. With a JSON or JSONL file:
+   ```
+   python jsonl-visualize.py path/to/your/file.json
+   ```
 
-If you want to pipe data into the script, you can do so like this:
+2. With piped input:
+   ```
+   cat path/to/your/file.json | python jsonl-visualize.py
+   ```
 
-```
-cat path/to/your/file.json | python jsonl-visualize.py
-```
+### Keyboard Controls
 
-## Navigation
+- Arrow keys: Navigate the tree
+- Enter: Expand/collapse nodes or view full text of truncated values
+- 'q' or Ctrl+C: Quit the application
+- 'b' or Escape: Go back from full text view to main tree view
 
-Once the visualizer is running, you can navigate through your JSON/JSONL data using the following keyboard shortcuts:
+## Error Handling
 
-- **↑ / ↓**: Move up and down through the tree
-- **→**: Expand a node
-- **←**: Collapse a node
-- **Enter**: Toggle node expansion/collapse
-- **q**: Quit the application
+When jsonl-visualize encounters a parsing error in a JSONL file, it will:
 
-When viewing long text fields in the modal view:
+1. Display the error in red at the appropriate position in the tree.
+2. Show the line number where the error occurred.
+3. Allow you to expand the error node to see:
+   - The original unparsable text
+   - The specific error message
 
-- **Esc**: Close the modal and return to the tree view
+This allows you to inspect and debug issues in your JSON data easily.
 
 ## Limitations
 
-- The tool may not perform well with extremely large JSON/JSONL files due to memory constraints.
-- Nested structures beyond a certain depth may become difficult to navigate.
-
-## Troubleshooting
-
-If you encounter any issues:
-
-1. Ensure you're using the latest version of the script.
-2. Check that you have the latest versions of the required dependencies installed.
-3. If the problem persists, please open an issue on the project's GitHub repository with a detailed description of the problem and the steps to reproduce it.
-
-## Contributing
-
-Contributions to improve the JSON/JSONL Visualizer are welcome! Please feel free to submit pull requests or open issues to suggest improvements or report bugs.
+- The application loads the entire JSON/JSONL file into memory, so it may not be suitable for extremely large files.
+- Syntax highlighting is not provided for the JSON structure to maintain simplicity and performance.
 
 ## License
 
-This project is open-source and available under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.
