@@ -4,4 +4,4 @@
 __pycache__/
 build
 dist
-jsonl-visualize.egg-info
+jsonl_visualize.egg-info
